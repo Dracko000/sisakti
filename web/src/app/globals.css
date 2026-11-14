@@ -1,0 +1,133 @@
+@import "tailwindcss";
+
+@theme {
+  /* Brand */
+  --color-primary: #1e88e5;
+  --color-primary-dark: #0d47a1;
+  --color-primary-deep: #082f63;
+  --color-primary-50: #e3f0fc;
+  --color-primary-100: #bbddf9;
+  --color-primary-200: #90c6f5;
+  --color-accent: #ff9800;
+  --color-accent-dark: #f57c00;
+  --color-accent-50: #fff3e0;
+  --color-accent-100: #ffe0b2;
+
+  /* Neutrals */
+  --color-bg: #f5f7fa;
+  --color-surface: #ffffff;
+  --color-ink: #0f172a;
+  --color-ink-2: #1e293b;
+  --color-text: #334155;
+  --color-muted: #64748b;
+  --color-subtle: #94a3b8;
+  --color-line: #e2e8f0;
+  --color-line-2: #eef2f7;
+  --color-sl-50: #f1f5f9;
+
+  /* Semantic */
+  --color-ok: #22c55e;
+  --color-ok-dark: #15803d;
+  --color-ok-50: #dcfce7;
+  --color-danger: #ef4444;
+  --color-danger-dark: #b91c1c;
+  --color-danger-50: #fee2e2;
+  --color-purple: #8b5cf6;
+  --color-purple-50: #ede9fe;
+  --color-teal: #14b8a6;
+  --color-teal-50: #ccfbf1;
+  --color-pink: #ec4899;
+  --color-pink-50: #fce7f3;
+  --color-amber-50: #fef3c7;
+  --color-amber-700: #b45309;
+
+  /* Fonts */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    font-family: var(--font-sans);
+  }
+  h1, h2, h3, h4, .font-display {
+    font-family: var(--font-display);
+  }
+}
+
+/* Utility classes */
+@utility card-shadow {
+  box-shadow: 0 10px 30px -6px rgba(15, 23, 42, 0.1);
+}
+@utility card-shadow-sm {
+  box-shadow: 0 4px 14px -4px rgba(15, 23, 42, 0.1);
+}
+
+/* Scrollbars */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+  background-clip: content-box;
+}
+
+/* Handwriting font used for board samples (system fallback chain) */
+.handwriting {
+  font-family: "Segoe Script", "Bradley Hand", "Segoe Print", cursive;
+}
+
+/* Notebook paper backgrounds for the interactive board */
+.paper-grid {
+  background-color: #ffffff;
+  background-image:
+    linear-gradient(to right, #dbe6f3 1px, transparent 1px),
+    linear-gradient(to bottom, #dbe6f3 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+.paper-graph {
+  background-color: #ffffff;
+  background-image:
+    linear-gradient(to right, #c8d6e8 1px, transparent 1px),
+    linear-gradient(to bottom, #c8d6e8 1px, transparent 1px),
+    linear-gradient(to right, #e4edf7 1px, transparent 1px),
+    linear-gradient(to bottom, #e4edf7 1px, transparent 1px);
+  background-size: 120px 120px, 120px 120px, 24px 24px, 24px 24px;
+}
+.paper-lines {
+  background-color: #ffffff;
+  background-image: linear-gradient(to bottom, #dbe6f3 1px, transparent 1px);
+  background-size: 100% 32px;
+  background-position: 0 6px;
+  box-shadow: inset 34px 0 0 -33px #f3b2b2;
+}
+.paper-dotted {
+  background-color: #ffffff;
+  background-image: radial-gradient(#c8d6e8 1.3px, transparent 1.4px);
+  background-size: 22px 22px;
+}
+.paper-plain {
+  background-color: #ffffff;
+}
+.paper-music {
+  background-color: #ffffff;
+  background-image:
+    repeating-linear-gradient(to bottom, #dbe6f3 0, #dbe6f3 1px, transparent 1px, transparent 8px, transparent 8px, transparent 60px);
+}
+
+/* Hide number input spinners */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}

@@ -1,0 +1,178 @@
+// SiSAKTI — Skema database (multi-tenant SaaS)
+// Dev: SQLite. Produksi: ganti provider = "postgresql" & DATABASE_URL, lalu `prisma migrate`.
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ------------------------------------------------------------------ Tenant (Sekolah/Organisasi)
+model Tenant {
+  id        String   @id @default(cuid())
+  name      String
+  npsn      String   @unique
+  level     String   @default("SMP/MTs")
+  city      String   @default("")
+  plan      String   @default("Trial") // Trial | Free | Pro | Enterprise
+  status    String   @default("Trial") // Trial | Active | Suspended
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  dapodik   TenantDapodik?
+  users     User[]
+  school    School?
+  teachers  Teacher[]
+  students  Student[]
+  rombels   Rombel[]
+  boards    Board[]
+  grades    GradeRow[]
+  attendance Attendance[]
+}
+
+// Koneksi Web Service Dapodik per-tenant (token disimpan terenkripsi di produksi)
+model TenantDapodik {
+  tenantId       String   @id
+  tenant         Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  baseUrl        String
+  npsn           String
+  token          String?
+  timeoutMs      Int      @default(8000)
+  lastSyncStatus String?
+  lastSyncAt     DateTime?
+  lastSyncCounts String? // JSON
+  updatedAt      DateTime @updatedAt
+}
+
+// ------------------------------------------------------------------ Akun & peran
+model User {
+  id          String   @id @default(cuid())
+  tenantId    String? // null = admin platform (superadmin)
+  tenant      Tenant?  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  name        String
+  email       String
+  passwordHash String?
+  role        String // student | teacher | parent | admin | superadmin
+  initials    String   @default("")
+  avatarColor String   @default("#1e88e5")
+  detail      String   @default("")
+  createdAt   DateTime @default(now())
+
+  @@unique([tenantId, email])
+  @@index([tenantId, role])
+}
+
+// ------------------------------------------------------------------ Master data hasil sinkronisasi Dapodik
+model School {
+  id         String @id @default(cuid())
+  tenantId   String @unique
+  tenant     Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  npsn       String @default("")
+  nama       String @default("")
+  bentuk     String @default("")
+  alamat     String @default("")
+  kecamatan  String @default("")
+  kabupaten  String @default("")
+  provinsi   String @default("")
+  akreditasi String @default("")
+}
+
+model Teacher {
+  id                String @id @default(cuid())
+  tenantId          String
+  tenant            Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  extId             String @default("") // id dari Dapodik
+  nama              String
+  nuptk             String @default("")
+  nip               String @default("")
+  jk                String @default("")
+  bidangStudi       String @default("")
+  statusKepegawaian String @default("")
+
+  @@unique([tenantId, extId])
+  @@index([tenantId])
+}
+
+model Student {
+  id            String @id @default(cuid())
+  tenantId      String
+  tenant        Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  extId         String @default("")
+  nama          String
+  nisn          String @default("")
+  nis           String @default("")
+  jk            String @default("")
+  rombel        String @default("")
+  tingkat       String @default("")
+  tanggalLahir  String @default("")
+
+  @@unique([tenantId, extId])
+  @@index([tenantId])
+}
+
+model Rombel {
+  id          String @id @default(cuid())
+  tenantId    String
+  tenant      Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  extId       String @default("")
+  nama        String
+  tingkat     String @default("")
+  waliKelas   String @default("")
+  jumlahSiswa Int    @default(0)
+
+  @@unique([tenantId, extId])
+  @@index([tenantId])
+}
+
+// ------------------------------------------------------------------ Data aplikasi (per tenant)
+model Board {
+  id             String   @id @default(cuid())
+  tenantId       String
+  tenant         Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  studentId      String
+  studentName    String   @default("")
+  subjectKey     String
+  paper          String   @default("grid")
+  status         String   @default("empty") // empty | writing | submitted | graded
+  content        String   @default("") // gabungan halaman (JSON/teks)
+  recognizedText String   @default("")
+  score          Int?
+  grade          String?
+  feedback       String   @default("")
+  submittedAt    DateTime?
+  updatedAt      DateTime @updatedAt
+
+  @@index([tenantId, studentId, subjectKey])
+}
+
+model GradeRow {
+  id        String @id @default(cuid())
+  tenantId  String
+  tenant    Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  studentId String
+  name      String @default("")
+  t1        Int    @default(0)
+  t2        Int    @default(0)
+  quiz      Int    @default(0)
+  uts       Int    @default(0)
+  board     Int    @default(0)
+
+  @@unique([tenantId, studentId])
+  @@index([tenantId])
+}
+
+model Attendance {
+  id          String   @id @default(cuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  studentId   String
+  name        String   @default("")
+  sessionDate DateTime @default(now())
+  joinedAt    String   @default("")
+  durationMin Int      @default(0)
+  status      String   @default("Hadir") // Hadir | Izin | Alpa | Sakit
+
+  @@index([tenantId, studentId])
+}
